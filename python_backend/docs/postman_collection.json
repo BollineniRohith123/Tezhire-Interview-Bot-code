@@ -1,0 +1,503 @@
+{
+  "info": {
+    "name": "Interview Bot API",
+    "description": "API documentation for the Interview Bot with Ultravox integration",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Ultravox",
+      "description": "Endpoints for Ultravox integration",
+      "item": [
+        {
+          "name": "Create Call",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{ultravox_api_key}}",
+                "description": "Ultravox API Key"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"systemPrompt\": \"You are an interviewer for a software engineering position. Ask questions about Python programming.\",\n  \"temperature\": 0.7,\n  \"model\": \"fixie-ai/ultravox-70B\",\n  \"voice\": \"echo\",\n  \"languageHint\": \"en-US\",\n  \"maxDuration\": \"1800s\",\n  \"recordingEnabled\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/ultravox",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ultravox"]
+            },
+            "description": "Create a new Ultravox call"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{ultravox_api_key}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"systemPrompt\": \"You are an interviewer for a software engineering position. Ask questions about Python programming.\",\n  \"temperature\": 0.7,\n  \"model\": \"fixie-ai/ultravox-70B\",\n  \"voice\": \"echo\",\n  \"languageHint\": \"en-US\",\n  \"maxDuration\": \"1800s\",\n  \"recordingEnabled\": true\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/ultravox",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "ultravox"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"callId\": \"call_123456789\",\n  \"joinUrl\": \"https://app.ultravox.ai/call/abcdef123456\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Call Messages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{ultravox_api_key}}",
+                "description": "Ultravox API Key"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/ultravox/messages?callId={{call_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ultravox", "messages"],
+              "query": [
+                {
+                  "key": "callId",
+                  "value": "{{call_id}}",
+                  "description": "ID of the call to fetch messages for"
+                }
+              ]
+            },
+            "description": "Get messages for a specific call"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{ultravox_api_key}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/ultravox/messages?callId={{call_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "ultravox", "messages"],
+                  "query": [
+                    {
+                      "key": "callId",
+                      "value": "{{call_id}}"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"results\": [\n    {\n      \"role\": \"ASSISTANT\",\n      \"text\": \"Hello, I'm your interviewer today. I'll be asking you some questions about Python programming.\",\n      \"medium\": \"VOICE\",\n      \"callStageMessageIndex\": 0,\n      \"callStageId\": \"stage_123\"\n    },\n    {\n      \"role\": \"USER\",\n      \"text\": \"Hi, I'm ready for the interview.\",\n      \"medium\": \"VOICE\",\n      \"callStageMessageIndex\": 1,\n      \"callStageId\": \"stage_123\"\n    }\n  ],\n  \"total\": 2,\n  \"next\": null,\n  \"previous\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Validate API Key",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"apiKey\": \"{{ultravox_api_key}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/ultravox/validate-key",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ultravox", "validate-key"]
+            },
+            "description": "Validate an Ultravox API key"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"apiKey\": \"{{ultravox_api_key}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/ultravox/validate-key",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "ultravox", "validate-key"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"valid\": true,\n  \"accountInfo\": {\n    \"name\": \"Example Account\",\n    \"billingUrl\": \"https://app.ultravox.ai/billing\",\n    \"freeTimeUsed\": \"1h 30m\",\n    \"freeTimeRemaining\": \"2h 30m\",\n    \"hasActiveSubscription\": true,\n    \"activeCalls\": 1,\n    \"allowedConcurrentCalls\": 5,\n    \"allowedVoices\": 10\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tezhire",
+      "description": "Endpoints for Tezhire integration",
+      "item": [
+        {
+          "name": "Create Interview Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{ultravox_api_key}}",
+                "description": "Ultravox API Key"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session\": {\n    \"sessionId\": \"session_123456\",\n    \"callbackUrl\": \"https://example.com/callback\"\n  },\n  \"candidate\": {\n    \"candidateId\": \"candidate_123\",\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"phone\": \"+1234567890\",\n    \"resumeData\": {\n      \"skills\": [\"Python\", \"JavaScript\", \"React\", \"Node.js\"],\n      \"experience\": [\n        {\n          \"company\": \"Example Corp\",\n          \"role\": \"Senior Developer\",\n          \"duration\": \"2 years\",\n          \"description\": \"Developed web applications using React and Node.js\"\n        }\n      ],\n      \"education\": [\n        {\n          \"institution\": \"Example University\",\n          \"degree\": \"Bachelor of Science\",\n          \"fieldOfStudy\": \"Computer Science\",\n          \"year\": 2018\n        }\n      ],\n      \"projects\": [\n        {\n          \"name\": \"Project X\",\n          \"description\": \"A web application for task management\",\n          \"technologies\": [\"React\", \"Node.js\", \"MongoDB\"]\n        }\n      ],\n      \"rawText\": \"John Doe\\nSenior Developer\\n\\nSkills: Python, JavaScript, React, Node.js\\n\\nExperience:\\nExample Corp - Senior Developer (2 years)\\nDeveloped web applications using React and Node.js\\n\\nEducation:\\nExample University - Bachelor of Science in Computer Science (2018)\\n\\nProjects:\\nProject X - A web application for task management using React, Node.js, and MongoDB\"\n    }\n  },\n  \"job\": {\n    \"jobId\": \"job_456\",\n    \"companyId\": \"company_789\",\n    \"recruiterUserId\": \"recruiter_101\",\n    \"title\": \"Senior Software Engineer\",\n    \"department\": \"Engineering\",\n    \"description\": \"We are looking for a Senior Software Engineer to join our team.\",\n    \"requirements\": [\"5+ years of experience in software development\", \"Strong knowledge of Python\", \"Experience with web frameworks\"],\n    \"responsibilities\": [\"Develop and maintain web applications\", \"Collaborate with cross-functional teams\", \"Mentor junior developers\"],\n    \"location\": \"San Francisco, CA\",\n    \"employmentType\": \"Full-time\",\n    \"experienceLevel\": \"Senior\",\n    \"salaryRange\": {\n      \"min\": 120000,\n      \"max\": 150000,\n      \"currency\": \"USD\"\n    }\n  },\n  \"interview\": {\n    \"duration\": 30,\n    \"difficultyLevel\": \"Medium\",\n    \"topicsToFocus\": [\"Python\", \"Web Development\", \"System Design\"],\n    \"topicsToAvoid\": [\"Personal Questions\", \"Salary Expectations\"],\n    \"customQuestions\": [\"Describe a challenging project you worked on recently\", \"How do you approach debugging a complex issue?\"],\n    \"interviewStyle\": \"Conversational\",\n    \"feedbackDetail\": \"Comprehensive\"\n  },\n  \"configuration\": {\n    \"language\": \"en-US\",\n    \"voiceId\": \"echo\",\n    \"enableTranscription\": true,\n    \"audioQuality\": \"high\",\n    \"timeZone\": \"America/Los_Angeles\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tezhire/interview-sessions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tezhire", "interview-sessions"]
+            },
+            "description": "Create a new interview session"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{ultravox_api_key}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"session\": {\n    \"sessionId\": \"session_123456\",\n    \"callbackUrl\": \"https://example.com/callback\"\n  },\n  \"candidate\": {\n    \"candidateId\": \"candidate_123\",\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"phone\": \"+1234567890\",\n    \"resumeData\": {\n      \"skills\": [\"Python\", \"JavaScript\", \"React\", \"Node.js\"],\n      \"experience\": [\n        {\n          \"company\": \"Example Corp\",\n          \"role\": \"Senior Developer\",\n          \"duration\": \"2 years\",\n          \"description\": \"Developed web applications using React and Node.js\"\n        }\n      ],\n      \"education\": [\n        {\n          \"institution\": \"Example University\",\n          \"degree\": \"Bachelor of Science\",\n          \"fieldOfStudy\": \"Computer Science\",\n          \"year\": 2018\n        }\n      ],\n      \"projects\": [\n        {\n          \"name\": \"Project X\",\n          \"description\": \"A web application for task management\",\n          \"technologies\": [\"React\", \"Node.js\", \"MongoDB\"]\n        }\n      ],\n      \"rawText\": \"John Doe\\nSenior Developer\\n\\nSkills: Python, JavaScript, React, Node.js\\n\\nExperience:\\nExample Corp - Senior Developer (2 years)\\nDeveloped web applications using React and Node.js\\n\\nEducation:\\nExample University - Bachelor of Science in Computer Science (2018)\\n\\nProjects:\\nProject X - A web application for task management using React, Node.js, and MongoDB\"\n    }\n  },\n  \"job\": {\n    \"jobId\": \"job_456\",\n    \"companyId\": \"company_789\",\n    \"recruiterUserId\": \"recruiter_101\",\n    \"title\": \"Senior Software Engineer\",\n    \"department\": \"Engineering\",\n    \"description\": \"We are looking for a Senior Software Engineer to join our team.\",\n    \"requirements\": [\"5+ years of experience in software development\", \"Strong knowledge of Python\", \"Experience with web frameworks\"],\n    \"responsibilities\": [\"Develop and maintain web applications\", \"Collaborate with cross-functional teams\", \"Mentor junior developers\"],\n    \"location\": \"San Francisco, CA\",\n    \"employmentType\": \"Full-time\",\n    \"experienceLevel\": \"Senior\",\n    \"salaryRange\": {\n      \"min\": 120000,\n      \"max\": 150000,\n      \"currency\": \"USD\"\n    }\n  },\n  \"interview\": {\n    \"duration\": 30,\n    \"difficultyLevel\": \"Medium\",\n    \"topicsToFocus\": [\"Python\", \"Web Development\", \"System Design\"],\n    \"topicsToAvoid\": [\"Personal Questions\", \"Salary Expectations\"],\n    \"customQuestions\": [\"Describe a challenging project you worked on recently\", \"How do you approach debugging a complex issue?\"],\n    \"interviewStyle\": \"Conversational\",\n    \"feedbackDetail\": \"Comprehensive\"\n  },\n  \"configuration\": {\n    \"language\": \"en-US\",\n    \"voiceId\": \"echo\",\n    \"enableTranscription\": true,\n    \"audioQuality\": \"high\",\n    \"timeZone\": \"America/Los_Angeles\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/tezhire/interview-sessions",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "tezhire", "interview-sessions"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"sessionId\": \"session_123456\",\n  \"joinUrl\": \"https://app.ultravox.ai/call/abcdef123456\",\n  \"expiry\": \"2023-05-01T12:00:00Z\",\n  \"status\": \"created\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Session Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{ultravox_api_key}}",
+                "description": "Ultravox API Key"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tezhire/interview-sessions/{{session_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tezhire", "interview-sessions", "{{session_id}}"]
+            },
+            "description": "Get the status of an interview session"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{ultravox_api_key}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/tezhire/interview-sessions/{{session_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "tezhire", "interview-sessions", "{{session_id}}"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"sessionId\": \"session_123456\",\n  \"status\": \"in_progress\",\n  \"candidateId\": \"candidate_123\",\n  \"jobId\": \"job_456\",\n  \"startTime\": \"2023-05-01T10:00:00Z\",\n  \"endTime\": null,\n  \"duration\": 300,\n  \"progress\": 45,\n  \"questionsAsked\": 5\n}"
+            }
+          ]
+        },
+        {
+          "name": "End Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{ultravox_api_key}}",
+                "description": "Ultravox API Key"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Interview completed\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tezhire/interview-sessions/{{session_id}}/end",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tezhire", "interview-sessions", "{{session_id}}", "end"]
+            },
+            "description": "End an interview session"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{ultravox_api_key}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Interview completed\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/tezhire/interview-sessions/{{session_id}}/end",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "tezhire", "interview-sessions", "{{session_id}}", "end"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"sessionId\": \"session_123456\",\n  \"status\": \"ended\",\n  \"duration\": 720\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Interview Results",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{ultravox_api_key}}",
+                "description": "Ultravox API Key"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tezhire/interview-sessions/{{session_id}}/results",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tezhire", "interview-sessions", "{{session_id}}", "results"]
+            },
+            "description": "Get the results of an interview session"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{ultravox_api_key}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/tezhire/interview-sessions/{{session_id}}/results",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "tezhire", "interview-sessions", "{{session_id}}", "results"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"sessionId\": \"session_123456\",\n  \"candidateId\": \"candidate_123\",\n  \"jobId\": \"job_456\",\n  \"companyId\": \"company_789\",\n  \"overallScore\": 78,\n  \"feedback\": {\n    \"summary\": \"The candidate demonstrated strong technical knowledge and problem-solving skills. Communication was clear and professional.\",\n    \"strengths\": [\n      \"Strong understanding of core programming concepts\",\n      \"Excellent problem-solving approach\",\n      \"Clear communication of technical ideas\"\n    ],\n    \"areasForImprovement\": [\n      \"Could improve knowledge of advanced algorithms\",\n      \"More experience with distributed systems would be beneficial\"\n    ],\n    \"technicalAssessment\": \"The candidate showed proficiency in most technical areas relevant to the position.\",\n    \"communicationAssessment\": \"Communication was clear, concise, and professional throughout the interview.\",\n    \"fitScore\": 82,\n    \"recommendation\": \"Hire\"\n  },\n  \"questions\": [\n    {\n      \"questionId\": \"q1\",\n      \"question\": \"Can you explain your approach to solving complex technical problems?\",\n      \"timestamp\": \"2023-05-01T10:05:00Z\",\n      \"answerTranscript\": \"I typically start by breaking down the problem into smaller components...\",\n      \"answerDuration\": 45,\n      \"evaluation\": {\n        \"score\": 85,\n        \"feedback\": \"Excellent problem decomposition approach\",\n        \"keyInsights\": [\"Methodical\", \"Structured thinking\", \"Clear communication\"]\n      }\n    },\n    {\n      \"questionId\": \"q2\",\n      \"question\": \"Describe your experience with distributed systems.\",\n      \"timestamp\": \"2023-05-01T10:10:00Z\",\n      \"answerTranscript\": \"I have worked on several projects involving distributed architectures...\",\n      \"answerDuration\": 60,\n      \"evaluation\": {\n        \"score\": 70,\n        \"feedback\": \"Good understanding but limited practical experience\",\n        \"keyInsights\": [\"Theoretical knowledge\", \"Limited hands-on experience\"]\n      }\n    }\n  ],\n  \"transcript\": {\n    \"full\": \"Full interview transcript would be here...\",\n    \"url\": \"https://api.example.com/transcripts/interview-123.txt\"\n  },\n  \"audio\": {\n    \"url\": \"https://api.example.com/recordings/interview-123.mp3\",\n    \"duration\": 1800\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Configure Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{ultravox_api_key}}",
+                "description": "Ultravox API Key"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://example.com/webhook\",\n  \"secret\": \"webhook_secret_123\",\n  \"events\": [\"interview.created\", \"interview.completed\", \"results.available\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tezhire/webhooks",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tezhire", "webhooks"]
+            },
+            "description": "Configure a webhook for interview events"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{ultravox_api_key}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"url\": \"https://example.com/webhook\",\n  \"secret\": \"webhook_secret_123\",\n  \"events\": [\"interview.created\", \"interview.completed\", \"results.available\"]\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/tezhire/webhooks",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "tezhire", "webhooks"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Webhook configured successfully\",\n  \"webhookId\": \"webhook-123456789\",\n  \"url\": \"https://example.com/webhook\",\n  \"events\": [\"interview.created\", \"interview.completed\", \"results.available\"]\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "description": "Base URL for the API"
+    },
+    {
+      "key": "ultravox_api_key",
+      "value": "your_ultravox_api_key",
+      "description": "Ultravox API Key"
+    },
+    {
+      "key": "session_id",
+      "value": "session_123456",
+      "description": "Interview session ID"
+    },
+    {
+      "key": "call_id",
+      "value": "call_123456789",
+      "description": "Ultravox call ID"
+    }
+  ]
+}
