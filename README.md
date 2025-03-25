@@ -1,103 +1,80 @@
-# Viva Voce Practice
+# Interview Bot with Tezhire-Ultravox Integration
 
-An interactive platform for medical students to practice their viva voce examination skills using AI.
+This project implements an interview bot application that integrates with Ultravox's WebRTC capabilities to conduct voice interviews. The application includes a complete API for creating and managing interview sessions, as well as a user interface for conducting interviews.
 
 ## Features
 
-- Real-time voice interaction with AI examiner
-- Multiple medical specialties
-- Instant feedback and analysis
-- Progress tracking
-- Secure and private sessions
-
-## Technologies Used
-
-- Next.js 14
-- React 18
-- Ultravox AI
-- TailwindCSS
-- TypeScript
-- Vercel Deployment
+- **Voice Interviews**: Conduct real-time voice interviews using Ultravox's WebRTC technology
+- **Comprehensive API**: Create, manage, and analyze interview sessions
+- **Candidate Assessment**: Evaluate candidates based on their responses and generate detailed reports
+- **Customizable Interviews**: Configure interview parameters such as duration, difficulty, and topics
+- **Real-time Transcription**: Get real-time transcripts of the interview
+- **Webhook Integration**: Receive real-time updates about interview sessions
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ installed
-- Ultravox API key
-- Git
+- Node.js 18.x or higher
+- An Ultravox API key
 
 ### Installation
 
-1. Clone the repository:
-```bash
-git clone <your-repo-url>
-cd viva-voce-practice
-```
-
+1. Clone the repository
 2. Install dependencies:
-```bash
-npm install
-```
+   ```bash
+   npm install
+   ```
+3. Create a `.env.local` file with your Ultravox API key:
+   ```
+   ULTRAVOX_API_KEY=your_api_key_here
+   ```
 
-3. Create .env.local file:
-```bash
-ULTRAVOX_API_KEY=your_api_key_here
-```
+### Running the Application
 
-4. Run development server:
 ```bash
 npm run dev
 ```
 
-## Deployment
+The application will be available at http://localhost:3000.
 
-### Deploying to Vercel
+## API Documentation
 
-1. Push code to GitHub:
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin YOUR_GITHUB_REPO_URL
-git push -u origin main
-```
+The API documentation is available in the [docs/tezhire-integration.md](docs/tezhire-integration.md) file. It includes detailed information about the API endpoints, request/response formats, and examples.
 
-2. On Vercel Dashboard:
-- Create new project
-- Import GitHub repository
-- Add environment variables:
-  - ULTRAVOX_API_KEY: Your API key
-- Deploy
+### API Endpoints
 
-### Environment Variables
+- `POST /api/tezhire/interview-sessions` - Create a new interview session
+- `GET /api/tezhire/interview-sessions/{sessionId}` - Check the status of an interview session
+- `POST /api/tezhire/interview-sessions/{sessionId}/end` - End an interview session
+- `GET /api/tezhire/interview-sessions/{sessionId}/results` - Get the results of an interview
+- `POST /api/tezhire/webhooks` - Configure webhooks for real-time updates
 
-Required environment variables:
-- `ULTRAVOX_API_KEY`: Your Ultravox API key
+## Demo Page
 
-## Development
+A demo page is available at `/tezhire` to test the Tezhire-Ultravox integration. The demo page allows you to:
 
-### File Structure
+1. Create an interview session with custom parameters
+2. Join the interview session using WebRTC
+3. Test microphone and speaker controls
+4. End the interview session
 
-```
-viva-voce-practice/
-├── app/
-│   ├── api/           # API routes
-│   ├── components/    # React components
-│   └── page.tsx      # Main page
-├── lib/              # Utilities and types
-├── public/           # Static assets
-└── styles/          # Global styles
-```
+## Implementation Details
 
-### Commands
+The application is built using:
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run lint` - Run ESLint
+- Next.js for the frontend and API routes
+- TypeScript for type safety
+- Tailwind CSS for styling
+- Ultravox Client SDK for WebRTC integration
+
+## Security Considerations
+
+- API keys are stored securely and never exposed to the client
+- All API endpoints require authentication
+- Sensitive candidate data is handled in compliance with data protection regulations
+- Webhook payloads are validated using a secret
 
 ## License
 
-MIT License - See LICENSE file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
