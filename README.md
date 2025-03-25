@@ -1,6 +1,6 @@
-# Interview Bot with Tezhire-Ultravox Integration
+# Interview Bot Python Backend
 
-This project implements an interview bot application that integrates with Ultravox's WebRTC capabilities to conduct voice interviews. The application includes a complete API for creating and managing interview sessions, as well as a user interface for conducting interviews.
+This is the Python backend for the Interview Bot application with Ultravox integration for WebRTC functionality. This backend is a migration from the original Next.js backend.
 
 ## Features
 
@@ -11,36 +11,32 @@ This project implements an interview bot application that integrates with Ultrav
 - **Real-time Transcription**: Get real-time transcripts of the interview
 - **Webhook Integration**: Receive real-time updates about interview sessions
 
-## Getting Started
+## Prerequisites
 
-### Prerequisites
-
-- Node.js 18.x or higher
+- Python 3.8 or higher
 - An Ultravox API key
 
-### Installation
+## Installation
 
 1. Clone the repository
 2. Install dependencies:
    ```bash
-   npm install
+   pip install -r requirements.txt
    ```
-3. Create a `.env.local` file with your Ultravox API key:
+3. Create a `.env` file with your Ultravox API key:
    ```
    ULTRAVOX_API_KEY=your_api_key_here
    ```
 
-### Running the Application
+## Running the Application
 
 ```bash
-npm run dev
+python main.py
 ```
 
-The application will be available at http://localhost:3000.
+The application will be available at http://localhost:8000.
 
 ## API Documentation
-
-The API documentation is available in the [docs/tezhire-integration.md](docs/tezhire-integration.md) file. It includes detailed information about the API endpoints, request/response formats, and examples.
 
 ### API Endpoints
 
@@ -49,24 +45,19 @@ The API documentation is available in the [docs/tezhire-integration.md](docs/tez
 - `POST /api/tezhire/interview-sessions/{sessionId}/end` - End an interview session
 - `GET /api/tezhire/interview-sessions/{sessionId}/results` - Get the results of an interview
 - `POST /api/tezhire/webhooks` - Configure webhooks for real-time updates
-
-## Demo Page
-
-A demo page is available at `/tezhire` to test the Tezhire-Ultravox integration. The demo page allows you to:
-
-1. Create an interview session with custom parameters
-2. Join the interview session using WebRTC
-3. Test microphone and speaker controls
-4. End the interview session
+- `POST /api/ultravox` - Create a new Ultravox call
+- `GET /api/ultravox/messages` - Get messages for a specific call
+- `POST /api/ultravox/validate-key` - Validate an Ultravox API key
 
 ## Implementation Details
 
 The application is built using:
 
-- Next.js for the frontend and API routes
-- TypeScript for type safety
-- Tailwind CSS for styling
-- Ultravox Client SDK for WebRTC integration
+- FastAPI for the API framework
+- Pydantic for data validation and serialization
+- HTTPX for making HTTP requests
+- Python-dotenv for environment variable management
+- Uvicorn for the ASGI server
 
 ## Security Considerations
 
@@ -77,4 +68,4 @@ The application is built using:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
