@@ -2,15 +2,20 @@ import os
 import json
 import logging
 from typing import Dict, Any, List, Optional
-from fastapi import APIRouter, Request, HTTPException, status, Depends
+from fastapi import APIRouter, Request, HTTPException, status, Depends, Query
 from fastapi.responses import JSONResponse
 import httpx
+import traceback
 
 from app.models.ultravox import (
     CallConfig, JoinUrlResponse, ValidateKeyRequest, 
-    ValidateKeyResponse, AccountInfo, ErrorResponse
+    ValidateKeyResponse, AccountInfo, ErrorResponse, Message
 )
 from app.utils.api import get_api_key, handle_api_error
+from app.utils.ultravox_config import (
+    ULTRAVOX_ENDPOINTS, get_default_headers, validate_call_config,
+    create_default_call_config, UltravoxConfig
+)
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -19,28 +24,97 @@ logger = logging.getLogger(__name__)
 # Create router
 router = APIRouter()
 
-# List of valid fields for Ultravox API
-VALID_FIELDS = [
-    'systemPrompt',
-    'temperature',
-    'model',
-    'voice',
-    'languageHint',
-    'initialMessages',
-    'joinTimeout',
-    'maxDuration',
-    'timeExceededMessage',
-    'inactivityMessages',
-    'selectedTools',
-    'medium',
-    'recordingEnabled',
-    'firstSpeaker',
-    'transcriptOptional',
-    'initialOutputMedium',
-    'vadSettings',
-    'firstSpeakerSettings',
-    'experimentalSettings'
-]
+# Timeout settings
+DEFAULT_TIMEOUT = 30.0
+MESSAGES_TIMEOUT = 10.0
+ACCOUNT_TIMEOUT = 10.0
+
+async def make_ultravox_request(
+    method: str,
+    endpoint: str,
+    api_key: str,
+    json_data: Optional[Dict[str, Any]] = None,
+    params: Optional[Dict[str, Any]] = None,
+    timeout: float = DEFAULT_TIMEOUT
+) -> Dict[str, Any]:
+    """
+    Make a request to the Ultravox API.
+    
+    Args:
+        method: HTTP method (GET, POST, etc.)
+        endpoint: API endpoint
+        api_key: Ultravox API key
+        json_data: JSON data for request body (optional)
+        params: Query parameters (optional)
+        timeout: Request timeout in seconds (optional)
+        
+    Returns:
+        Dict[str, Any]: API response
+        
+    Raises:
+        HTTPException: If the request fails
+    """
+    headers = get_default_headers(api_key)
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.request(
+                method,
+                endpoint,
+                headers=headers,
+                json=json_data,
+                params=params,
+                timeout=timeout
+            )
+            
+            logger.info("Ultravox API response: %s", {
+                "status": response.status_code,
+                "ok": response.is_success,
+                "status_text": response.reason_phrase,
+                "endpoint": endpoint
+            })
+            
+            if not response.is_success:
+                error_text = response.text
+                logger.error(f"Ultravox API error response: {error_text}")
+                
+                try:
+                    error_json = response.json()
+                    error_message = error_json.get("error") or error_json.get("message") or error_text
+                except:
+                    # Use raw error text if parsing fails
+                    error_message = error_text
+                
+                raise HTTPException(
+                    status_code=response.status_code,
+                    detail={"error": "Ultravox API error", "details": error_message}
+                )
+            
+            return response.json()
+            
+    except httpx.TimeoutException:
+        logger.error(f"Ultravox API request timed out: {endpoint}")
+        raise HTTPException(
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+            detail={"error": "API request timed out", "details": "The Ultravox API did not respond in time"}
+        )
+    except httpx.RequestError as e:
+        logger.error(f"Ultravox API request failed: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail={"error": "API request failed", "details": str(e)}
+        )
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error in Ultravox API request: {str(e)}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "Internal server error", "details": str(e)}
+        )
+
 
 @router.post("/", response_model=Dict[str, Any])
 async def create_call(request: Request):
@@ -75,35 +149,15 @@ async def create_call(request: Request):
         try:
             raw_body = await request.json()
             
-            # Type-safe body construction with field validation
-            sanitized_body: Dict[str, Any] = {}
-            
-            for key, value in raw_body.items():
-                if key in VALID_FIELDS:
-                    # Type checking for each field
-                    if key in ['systemPrompt', 'model', 'voice', 'languageHint', 'maxDuration', 'timeExceededMessage']:
-                        if isinstance(value, str):
-                            sanitized_body[key] = value
-                    elif key == 'temperature':
-                        if isinstance(value, (int, float)):
-                            sanitized_body[key] = value
-                    elif key in ['selectedTools', 'initialMessages', 'inactivityMessages']:
-                        if isinstance(value, list):
-                            sanitized_body[key] = value
-                    elif key in ['recordingEnabled', 'transcriptOptional']:
-                        if isinstance(value, bool):
-                            sanitized_body[key] = value
-            
-            # Ensure required fields are present
-            if 'systemPrompt' not in sanitized_body:
-                raise ValueError("System prompt is required")
-            
-            body = sanitized_body
-            
-            # Ensure maxDuration has 's' suffix
-            if 'maxDuration' in body and not body['maxDuration'].endswith('s'):
-                body['maxDuration'] = f"{body['maxDuration']}s"
+            # Validate and sanitize the call configuration
+            body = validate_call_config(raw_body)
                 
+        except ValueError as e:
+            logger.error(f"Error validating request body: {str(e)}")
+            return JSONResponse(
+                content={"error": "Invalid request", "details": str(e)},
+                status_code=400
+            )
         except Exception as e:
             logger.error(f"Error parsing request body: {str(e)}")
             return JSONResponse(
@@ -117,63 +171,20 @@ async def create_call(request: Request):
             "max_duration": body.get("maxDuration")
         })
         
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    'https://api.ultravox.ai/api/calls',
-                    headers={
-                        'Content-Type': 'application/json',
-                        'X-API-Key': api_key,
-                        'Accept': 'application/json',
-                        'User-Agent': 'Ultravox-Client/1.0',
-                    },
-                    json={
-                        **body,
-                        "model": body.get("model", "fixie-ai/ultravox-70B"),
-                    },
-                    timeout=30.0
-                )
-            
-            logger.info("Ultravox API response: %s", {
-                "status": response.status_code,
-                "ok": response.is_success,
-                "status_text": response.reason_phrase
-            })
-            
-            if not response.is_success:
-                error_text = response.text
-                logger.error(f"Ultravox API error response: {error_text}")
-                
-                try:
-                    error_json = response.json()
-                    error_message = error_json.get("error") or error_json.get("message") or error_text
-                except:
-                    # Use raw error text if parsing fails
-                    error_message = error_text
-                
-                return JSONResponse(
-                    content={"error": "Ultravox API error", "details": error_message},
-                    status_code=response.status_code
-                )
-            
-            data = response.json()
-            return data
-            
-        except Exception as e:
-            logger.error(f"Ultravox API call failed: {str(e)}")
-            return JSONResponse(
-                content={
-                    "error": "API request failed",
-                    "details": str(e)
-                },
-                status_code=500
-            )
+        # Make request to Ultravox API
+        return await make_ultravox_request(
+            "POST",
+            ULTRAVOX_ENDPOINTS["calls"],
+            api_key,
+            json_data=body
+        )
             
     except HTTPException as e:
         # Re-raise HTTP exceptions
         raise e
     except Exception as e:
         logger.error(f"Error in API route: {str(e)}")
+        logger.error(traceback.format_exc())
         return JSONResponse(
             content={
                 "error": "Internal server error",
@@ -198,23 +209,13 @@ async def validate_key(request: ValidateKeyRequest):
             )
         
         # Validate by fetching account info
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                'https://api.ultravox.ai/api/accounts/me',
-                headers={
-                    'Content-Type': 'application/json',
-                    'X-API-Key': api_key,
-                },
-                timeout=10.0
-            )
+        account_info = await make_ultravox_request(
+            "GET",
+            ULTRAVOX_ENDPOINTS["account"],
+            api_key,
+            timeout=ACCOUNT_TIMEOUT
+        )
         
-        if not response.is_success:
-            raise handle_api_error(
-                status.HTTP_401_UNAUTHORIZED,
-                "Invalid security key"
-            )
-        
-        account_info = response.json()
         return {
             "valid": True,
             "accountInfo": account_info
@@ -225,6 +226,7 @@ async def validate_key(request: ValidateKeyRequest):
         raise e
     except Exception as e:
         logger.error(f"Error validating key: {str(e)}")
+        logger.error(traceback.format_exc())
         raise handle_api_error(
             status.HTTP_500_INTERNAL_SERVER_ERROR,
             "Validation failed",
@@ -233,7 +235,10 @@ async def validate_key(request: ValidateKeyRequest):
 
 
 @router.get("/messages", response_model=Dict[str, Any])
-async def get_messages(request: Request, call_id: str):
+async def get_messages(
+    request: Request, 
+    call_id: str = Query(..., description="The ID of the call to fetch messages for")
+):
     """
     Get messages for a specific call.
     """
@@ -247,43 +252,134 @@ async def get_messages(request: Request, call_id: str):
         # Get API key
         api_key = get_api_key(request)
         
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f'https://api.ultravox.ai/api/calls/{call_id}/messages',
-                headers={
-                    'Content-Type': 'application/json',
-                    'X-API-Key': api_key,
-                    'Accept': 'application/json',
-                },
-                timeout=10.0
-            )
+        # Format the messages endpoint with the call ID
+        endpoint = ULTRAVOX_ENDPOINTS["messages"].format(call_id=call_id)
         
-        if not response.is_success:
-            error_text = response.text
-            
-            try:
-                error_json = response.json()
-                error_message = error_json.get("error") or error_json.get("message") or error_text
-            except:
-                # Use raw error text if parsing fails
-                error_message = error_text
-            
-            raise handle_api_error(
-                response.status_code,
-                "Failed to fetch messages",
-                error_message
-            )
-        
-        data = response.json()
-        return data
+        # Make request to Ultravox API
+        return await make_ultravox_request(
+            "GET",
+            endpoint,
+            api_key,
+            timeout=MESSAGES_TIMEOUT
+        )
         
     except HTTPException as e:
         # Re-raise HTTP exceptions
         raise e
     except Exception as e:
         logger.error(f"Error in API route: {str(e)}")
+        logger.error(traceback.format_exc())
         raise handle_api_error(
             status.HTTP_500_INTERNAL_SERVER_ERROR,
             "Internal server error",
             str(e)
+        )
+
+
+@router.post("/create-with-defaults", response_model=Dict[str, Any])
+async def create_call_with_defaults(
+    request: Request,
+    system_prompt: str = Query(..., description="The system prompt for the call"),
+    model: Optional[str] = Query(None, description="The model to use"),
+    voice: Optional[str] = Query(None, description="The voice to use"),
+    max_duration: Optional[str] = Query(None, description="Maximum duration in seconds"),
+    temperature: Optional[float] = Query(None, description="Temperature for model generation")
+):
+    """
+    Create a new Ultravox call with default settings.
+    """
+    try:
+        # Get API key
+        api_key = get_api_key(request)
+        
+        # Create default call configuration
+        kwargs = {}
+        if model:
+            kwargs["model"] = model
+        if voice:
+            kwargs["voice"] = voice
+        if max_duration:
+            kwargs["maxDuration"] = max_duration
+        if temperature is not None:
+            kwargs["temperature"] = temperature
+            
+        call_config = create_default_call_config(system_prompt, **kwargs)
+        
+        # Make request to Ultravox API
+        return await make_ultravox_request(
+            "POST",
+            ULTRAVOX_ENDPOINTS["calls"],
+            api_key,
+            json_data=call_config
+        )
+        
+    except HTTPException as e:
+        # Re-raise HTTP exceptions
+        raise e
+    except ValueError as e:
+        # Handle validation errors
+        logger.error(f"Error validating call configuration: {str(e)}")
+        return JSONResponse(
+            content={"error": "Invalid request", "details": str(e)},
+            status_code=400
+        )
+    except Exception as e:
+        logger.error(f"Error in API route: {str(e)}")
+        logger.error(traceback.format_exc())
+        return JSONResponse(
+            content={
+                "error": "Internal server error",
+                "details": str(e)
+            },
+            status_code=500
+        )
+
+
+@router.get("/health", response_model=Dict[str, Any])
+async def ultravox_health_check(request: Request):
+    """
+    Check the health of the Ultravox API.
+    """
+    try:
+        # Get API key
+        api_key = get_api_key(request)
+        
+        # Check account info as a health check
+        await make_ultravox_request(
+            "GET",
+            ULTRAVOX_ENDPOINTS["account"],
+            api_key,
+            timeout=ACCOUNT_TIMEOUT
+        )
+        
+        return {
+            "status": "healthy",
+            "message": "Ultravox API is operational"
+        }
+        
+    except HTTPException as e:
+        # Return unhealthy status with error details
+        status_code = e.status_code
+        detail = e.detail
+        
+        return JSONResponse(
+            content={
+                "status": "unhealthy",
+                "message": "Ultravox API is not operational",
+                "error": detail.get("error") if isinstance(detail, dict) else str(detail),
+                "status_code": status_code
+            },
+            status_code=200  # Always return 200 for health checks
+        )
+    except Exception as e:
+        logger.error(f"Error in health check: {str(e)}")
+        logger.error(traceback.format_exc())
+        
+        return JSONResponse(
+            content={
+                "status": "unhealthy",
+                "message": "Ultravox API is not operational",
+                "error": str(e)
+            },
+            status_code=200  # Always return 200 for health checks
         )
