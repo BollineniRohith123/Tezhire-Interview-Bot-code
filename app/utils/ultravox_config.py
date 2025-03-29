@@ -189,6 +189,31 @@ def create_default_call_config(system_prompt: str, **kwargs) -> Dict[str, Any]:
     
     return validate_call_config(call_config)
 
+def validate_join_request(request: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Validate and sanitize a join request.
+    
+    Args:
+        request: The join request to validate
+        
+    Returns:
+        Dict[str, Any]: Sanitized request
+        
+    Raises:
+        ValueError: If the request is invalid
+    """
+    # Check for API key
+    if "apiKey" not in request or not request["apiKey"]:
+        raise ValueError("API key must not be empty")
+    
+    # Validate temperature if present
+    if "temperature" in request:
+        temp = request["temperature"]
+        if not isinstance(temp, (int, float)) or temp < 0.0 or temp > 1.0:
+            raise ValueError("Temperature must be a number between 0.0 and 1.0")
+    
+    return request
+
 def create_default_join_request(api_key: str, system_prompt: Optional[str] = None, **kwargs) -> Dict[str, Any]:
     """
     Create a default join request with the given API key.
