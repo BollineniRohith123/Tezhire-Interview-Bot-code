@@ -34,6 +34,7 @@ async def health_check():
 
 # Import and include routers
 from app.routers import ultravox, tezhire
+from app.controllers import ultravox_controller
 
 app.include_router(ultravox.router, prefix="/api/ultravox", tags=["ultravox"])
 app.include_router(tezhire.router, prefix="/api/tezhire", tags=["tezhire"])
