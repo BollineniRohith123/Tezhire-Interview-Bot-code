@@ -285,6 +285,186 @@ async def configure_webhook(webhook_url: str, secret: str, events: list) -> Dict
         return response.json()
 
 
+async def join_ultravox_call() -> Dict[str, Any]:
+    """
+    Join a new Ultravox call.
+    
+    Returns:
+        Dict[str, Any]: The response from the API
+    """
+    url = f"{API_BASE_URL}/api/ultravox/join"
+    payload = {
+        "apiKey": ULTRAVOX_API_KEY,
+        "systemPrompt": "You are an interviewer for a software engineering position. Ask questions about Python programming.",
+        "model": "fixie-ai/ultravox-70B",
+        "voice": "terrence",
+        "languageHint": "en",
+        "temperature": 0.4
+    }
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload)
+        response.raise_for_status()
+        return response.json()
+
+
+async def create_ultravox_call_advanced() -> Dict[str, Any]:
+    """
+    Create a new Ultravox call with advanced options.
+    
+    Returns:
+        Dict[str, Any]: The response from the API
+    """
+    url = f"{API_BASE_URL}/api/ultravox/create-call"
+    payload = {
+        "apiKey": ULTRAVOX_API_KEY,
+        "systemPrompt": "You are an interviewer for a software engineering position. Ask questions about Python programming.",
+        "model": "fixie-ai/ultravox-70B",
+        "voice": "terrence",
+        "externalVoice": {
+            "elevenLabs": {
+                "voiceId": "voice-id",
+                "model": "eleven-model"
+            }
+        },
+        "maxDuration": "1800s",
+        "recordingEnabled": True,
+        "firstSpeaker": "FIRST_SPEAKER_AGENT",
+        "firstSpeakerSettings": {
+            "agent": {
+                "text": "Hello, I'm your interviewer today. Let's get started with your technical interview."
+            }
+        }
+    }
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload)
+        response.raise_for_status()
+        return response.json()
+
+
+async def list_ultravox_calls(cursor: Optional[str] = None) -> Dict[str, Any]:
+    """
+    List all Ultravox calls.
+    
+    Args:
+        cursor: Pagination cursor for fetching next page of results (optional)
+        
+    Returns:
+        Dict[str, Any]: The response from the API
+    """
+    url = f"{API_BASE_URL}/api/ultravox/list-calls"
+    payload = {
+        "apiKey": ULTRAVOX_API_KEY
+    }
+    
+    if cursor:
+        payload["cursor"] = cursor
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload)
+        response.raise_for_status()
+        return response.json()
+
+
+async def get_ultravox_call_details(call_id: str) -> Dict[str, Any]:
+    """
+    Get details for a specific Ultravox call.
+    
+    Args:
+        call_id: The ID of the call to fetch details for
+        
+    Returns:
+        Dict[str, Any]: The response from the API
+    """
+    url = f"{API_BASE_URL}/api/ultravox/call-details"
+    payload = {
+        "apiKey": ULTRAVOX_API_KEY,
+        "callId": call_id
+    }
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload)
+        response.raise_for_status()
+        return response.json()
+
+
+async def get_ultravox_call_messages(call_id: str, cursor: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Get messages for a specific Ultravox call.
+    
+    Args:
+        call_id: The ID of the call to fetch messages for
+        cursor: Pagination cursor for fetching next page of results (optional)
+        
+    Returns:
+        Dict[str, Any]: The response from the API
+    """
+    url = f"{API_BASE_URL}/api/ultravox/call-messages"
+    payload = {
+        "apiKey": ULTRAVOX_API_KEY,
+        "callId": call_id
+    }
+    
+    if cursor:
+        payload["cursor"] = cursor
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload)
+        response.raise_for_status()
+        return response.json()
+
+
+async def list_ultravox_call_stages(call_id: str, cursor: Optional[str] = None) -> Dict[str, Any]:
+    """
+    List all stages for a specific Ultravox call.
+    
+    Args:
+        call_id: The ID of the call to fetch stages for
+        cursor: Pagination cursor for fetching next page of results (optional)
+        
+    Returns:
+        Dict[str, Any]: The response from the API
+    """
+    url = f"{API_BASE_URL}/api/ultravox/call-stages"
+    payload = {
+        "apiKey": ULTRAVOX_API_KEY,
+        "callId": call_id
+    }
+    
+    if cursor:
+        payload["cursor"] = cursor
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload)
+        response.raise_for_status()
+        return response.json()
+
+
+async def get_ultravox_call_stage_details(call_id: str, call_stage_id: str) -> Dict[str, Any]:
+    """
+    Get details for a specific Ultravox call stage.
+    
+    Args:
+        call_id: The ID of the call
+        call_stage_id: The ID of the call stage to fetch details for
+        
+    Returns:
+        Dict[str, Any]: The response from the API
+    """
+    url = f"{API_BASE_URL}/api/ultravox/call-stage-details"
+    payload = {
+        "apiKey": ULTRAVOX_API_KEY,
+        "callId": call_id,
+        "callStageId": call_stage_id
+    }
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload)
+        response.raise_for_status()
+        return response.json()
+
+
 async def main():
     """
     Run sample API requests.
@@ -327,6 +507,19 @@ async def main():
             print(f"Getting messages for call {join_call_id} (new API)...")
             new_messages_result = await get_ultravox_call_messages(join_call_id)
             print(f"Call messages (new API): {json.dumps(new_messages_result, indent=2)}\n")
+        
+        # List call stages (new API)
+        if join_call_id:
+            print(f"Listing stages for call {join_call_id} (new API)...")
+            stages_result = await list_ultravox_call_stages(join_call_id)
+            print(f"Call stages: {json.dumps(stages_result, indent=2)}\n")
+            
+            # If there are any stages, get details for the first one
+            if stages_result.get("results") and len(stages_result["results"]) > 0:
+                stage_id = stages_result["results"][0]["callStageId"]
+                print(f"Getting details for stage {stage_id} (new API)...")
+                stage_details_result = await get_ultravox_call_stage_details(join_call_id, stage_id)
+                print(f"Stage details: {json.dumps(stage_details_result, indent=2)}\n")
         
         # Create Ultravox call (legacy API)
         print("Creating Ultravox call (legacy API)...")
