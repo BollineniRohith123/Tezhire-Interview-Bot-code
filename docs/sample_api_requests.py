@@ -295,19 +295,52 @@ async def main():
         validation_result = await validate_api_key(ULTRAVOX_API_KEY)
         print(f"API key validation result: {json.dumps(validation_result, indent=2)}\n")
         
-        # Create Ultravox call
-        print("Creating Ultravox call...")
+        # Join Ultravox call (new API)
+        print("Joining Ultravox call (new API)...")
+        join_result = await join_ultravox_call()
+        join_call_id = join_result.get("callId")
+        join_url = join_result.get("joinUrl")
+        print(f"Call joined: {json.dumps(join_result, indent=2)}\n")
+        print(f"Join URL: {join_url}\n")
+        
+        # Create Ultravox call with advanced options (new API)
+        print("Creating Ultravox call with advanced options (new API)...")
+        advanced_call_result = await create_ultravox_call_advanced()
+        advanced_call_id = advanced_call_result.get("callId")
+        print(f"Advanced call created: {json.dumps(advanced_call_result, indent=2)}\n")
+        
+        # List Ultravox calls (new API)
+        print("Listing Ultravox calls (new API)...")
+        list_result = await list_ultravox_calls()
+        print(f"Call list: {json.dumps(list_result, indent=2)}\n")
+        
+        # Get call details (new API)
+        if join_call_id:
+            print(f"Getting details for call {join_call_id} (new API)...")
+            details_result = await get_ultravox_call_details(join_call_id)
+            print(f"Call details: {json.dumps(details_result, indent=2)}\n")
+        
+        # Get call messages (new API)
+        if join_call_id:
+            print(f"Waiting 5 seconds for messages to be generated...")
+            await asyncio.sleep(5)
+            print(f"Getting messages for call {join_call_id} (new API)...")
+            new_messages_result = await get_ultravox_call_messages(join_call_id)
+            print(f"Call messages (new API): {json.dumps(new_messages_result, indent=2)}\n")
+        
+        # Create Ultravox call (legacy API)
+        print("Creating Ultravox call (legacy API)...")
         call_result = await create_ultravox_call()
         call_id = call_result.get("callId")
         print(f"Call created: {json.dumps(call_result, indent=2)}\n")
         
-        # Get call messages (after a delay to allow for messages to be generated)
+        # Get call messages (legacy API)
         if call_id:
             print(f"Waiting 5 seconds for messages to be generated...")
             await asyncio.sleep(5)
-            print(f"Getting messages for call {call_id}...")
+            print(f"Getting messages for call {call_id} (legacy API)...")
             messages_result = await get_call_messages(call_id)
-            print(f"Call messages: {json.dumps(messages_result, indent=2)}\n")
+            print(f"Call messages (legacy API): {json.dumps(messages_result, indent=2)}\n")
         
         # Create interview session
         print("Creating interview session...")
