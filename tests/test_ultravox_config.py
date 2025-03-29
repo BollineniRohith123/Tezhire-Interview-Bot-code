@@ -8,7 +8,7 @@ from typing import Dict, Any
 
 from app.utils.ultravox_config import (
     UltravoxConfig, validate_call_config, create_default_call_config,
-    get_default_headers, VALID_FIELDS, REQUIRED_FIELDS
+    get_default_headers, create_api_payload, VALID_FIELDS, REQUIRED_FIELDS
 )
 
 
@@ -137,12 +137,35 @@ class TestGetDefaultHeaders(unittest.TestCase):
     
     def test_headers(self):
         """Test that headers are generated correctly."""
-        headers = get_default_headers("test-api-key")
+        headers = get_default_headers()
         
         self.assertEqual(headers["Content-Type"], "application/json")
-        self.assertEqual(headers["X-API-Key"], "test-api-key")
         self.assertEqual(headers["Accept"], "application/json")
         self.assertEqual(headers["User-Agent"], "Ultravox-Client/1.0")
+
+
+class TestCreateApiPayload(unittest.TestCase):
+    """Test cases for the create_api_payload function."""
+    
+    def test_create_payload_with_api_key_only(self):
+        """Test creating a payload with only the API key."""
+        payload = create_api_payload("test-api-key")
+        
+        self.assertEqual(payload["apiKey"], "test-api-key")
+        self.assertEqual(len(payload), 1)
+    
+    def test_create_payload_with_additional_params(self):
+        """Test creating a payload with additional parameters."""
+        payload = create_api_payload(
+            "test-api-key",
+            callId="test-call-id",
+            cursor="test-cursor"
+        )
+        
+        self.assertEqual(payload["apiKey"], "test-api-key")
+        self.assertEqual(payload["callId"], "test-call-id")
+        self.assertEqual(payload["cursor"], "test-cursor")
+        self.assertEqual(len(payload), 3)
 
 
 if __name__ == "__main__":

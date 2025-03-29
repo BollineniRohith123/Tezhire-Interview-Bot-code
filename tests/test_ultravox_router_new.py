@@ -54,7 +54,7 @@ class TestUltravoxRouter(unittest.TestCase):
         # Check the response
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data["joinUrl"], "https://example.com/join/test-call-id")
+        self.assertEqual(data["joinUrl"], "wss://prod-voice-pgaenaxiea-uc.a.run.app/calls/test-call-id")
         self.assertEqual(data["callId"], "test-call-id")
         
         # Check that the controller was called correctly

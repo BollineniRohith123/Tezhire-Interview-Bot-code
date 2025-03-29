@@ -275,17 +275,19 @@ async def get_call_stage_details(api_key: str, call_id: str, call_stage_id: str)
     - call_stage_id: Unique identifier of the call stage to retrieve
     """
     try:
-        # Prepare the URL
-        url = f"https://api.ultravox.ai/api/calls/{call_id}/stages/{call_stage_id}"
+        # Prepare payload with API key, call ID, and call stage ID
+        payload = {
+            "apiKey": api_key,
+            "callId": call_id,
+            "callStageId": call_stage_id
+        }
             
         # Fetch the call stage details
         async with httpx.AsyncClient() as client:
-            response = await client.get(
-                url,
-                headers={
-                    "Content-Type": "application/json",
-                    "X-API-Key": api_key,
-                },
+            response = await client.post(
+                "https://prod-voice-pgaenaxiea-uc.a.run.app/ultravox/call-stage-details",
+                headers={"Content-Type": "application/json"},
+                json=payload,
                 timeout=30.0  # Set an appropriate timeout
             )
             
