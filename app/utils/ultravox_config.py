@@ -188,3 +188,40 @@ def create_default_call_config(system_prompt: str, **kwargs) -> Dict[str, Any]:
     call_config.update(kwargs)
     
     return validate_call_config(call_config)
+
+def create_default_join_request(api_key: str, system_prompt: Optional[str] = None, **kwargs) -> Dict[str, Any]:
+    """
+    Create a default join request with the given API key.
+    
+    Args:
+        api_key: The API key to use
+        system_prompt: The system prompt to use (optional)
+        **kwargs: Additional configuration options
+        
+    Returns:
+        Dict[str, Any]: Join request
+    """
+    config = UltravoxConfig.from_env()
+    
+    join_request = {
+        "apiKey": api_key,
+    }
+    
+    # Add system prompt if provided
+    if system_prompt:
+        join_request["systemPrompt"] = system_prompt
+    
+    # Add default values
+    if "model" not in kwargs:
+        join_request["model"] = config.model
+    if "voice" not in kwargs:
+        join_request["voice"] = config.voice
+    if "languageHint" not in kwargs:
+        join_request["languageHint"] = config.language_hint
+    if "temperature" not in kwargs:
+        join_request["temperature"] = config.temperature
+    
+    # Override with any provided kwargs
+    join_request.update(kwargs)
+    
+    return validate_join_request(join_request)

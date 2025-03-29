@@ -194,26 +194,70 @@ Common error scenarios:
 
 ## Usage Examples
 
-### Creating a Call
+### Joining a Call
+
+```python
+import httpx
+
+async def join_call():
+    url = "http://localhost:8000/api/ultravox/join"
+    payload = {
+        "apiKey": "your-ultravox-api-key",
+        "systemPrompt": "You are an interviewer for a software engineering position...",
+        "model": "fixie-ai/ultravox-70B",
+        "voice": "terrence",
+        "temperature": 0.4
+    }
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload)
+        response.raise_for_status()
+        return response.json()
+```
+
+### Creating a Call with Advanced Options
 
 ```python
 import httpx
 
 async def create_call():
-    url = "http://localhost:8000/api/ultravox"
-    headers = {
-        "Content-Type": "application/json",
-        "X-API-Key": "your-api-key"
-    }
+    url = "http://localhost:8000/api/ultravox/create-call"
     payload = {
+        "apiKey": "your-ultravox-api-key",
         "systemPrompt": "You are an interviewer for a software engineering position...",
         "model": "fixie-ai/ultravox-70B",
-        "voice": "echo",
+        "voice": "terrence",
+        "externalVoice": {
+            "elevenLabs": {
+                "voiceId": "voice-id",
+                "model": "eleven-model"
+            }
+        },
         "maxDuration": "1800s"
     }
     
     async with httpx.AsyncClient() as client:
-        response = await client.post(url, headers=headers, json=payload)
+        response = await client.post(url, json=payload)
+        response.raise_for_status()
+        return response.json()
+```
+
+### Listing Calls with Pagination
+
+```python
+import httpx
+
+async def list_calls(cursor=None):
+    url = "http://localhost:8000/api/ultravox/list-calls"
+    payload = {
+        "apiKey": "your-ultravox-api-key"
+    }
+    
+    if cursor:
+        payload["cursor"] = cursor
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload)
         response.raise_for_status()
         return response.json()
 ```
@@ -223,14 +267,18 @@ async def create_call():
 ```python
 import httpx
 
-async def get_messages(call_id):
-    url = f"http://localhost:8000/api/ultravox/messages?call_id={call_id}"
-    headers = {
-        "X-API-Key": "your-api-key"
+async def get_call_messages(call_id, cursor=None):
+    url = "http://localhost:8000/api/ultravox/call-messages"
+    payload = {
+        "apiKey": "your-ultravox-api-key",
+        "callId": call_id
     }
     
+    if cursor:
+        payload["cursor"] = cursor
+    
     async with httpx.AsyncClient() as client:
-        response = await client.get(url, headers=headers)
+        response = await client.post(url, json=payload)
         response.raise_for_status()
         return response.json()
 ```
@@ -252,7 +300,7 @@ python run_tests.py
 
 ### API Key Issues
 
-- Ensure your API key is correctly set in the environment variables or passed in the request header
+- Ensure your API key is correctly set in the environment variables or passed in the request body
 - Validate your API key using the `/api/ultravox/validate-key` endpoint
 
 ### Connection Issues
@@ -273,3 +321,9 @@ python run_tests.py
 3. **Testing**: Test your integration thoroughly before deploying to production
 4. **Monitoring**: Monitor API usage and errors to identify issues early
 5. **Security**: Keep your API key secure and never expose it in client-side code
+6. **Pagination**: When listing calls or messages, implement proper pagination handling
+7. **External Voices**: When using external voice providers, test thoroughly to ensure compatibility
+8. **Temperature Setting**: Use appropriate temperature values (0.0-1.0) based on your needs:
+   - Lower values (0.0-0.3): More deterministic, consistent responses
+   - Medium values (0.4-0.6): Balanced creativity and consistency
+   - Higher values (0.7-1.0): More creative, varied responses

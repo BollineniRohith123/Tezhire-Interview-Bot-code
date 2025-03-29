@@ -345,10 +345,12 @@ async def ultravox_health_check(request: Request):
         api_key = get_api_key(request)
         
         # Check account info as a health check
+        headers = get_default_headers(api_key)
+        
         await make_ultravox_request(
             "GET",
             ULTRAVOX_ENDPOINTS["account"],
-            api_key,
+            headers=headers,
             timeout=ACCOUNT_TIMEOUT
         )
         
