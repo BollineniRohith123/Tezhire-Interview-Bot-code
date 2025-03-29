@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tezhire Interview Bot Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Tezhire Interview Bot Demo</h1>
+            <p>This demo showcases a WebRTC-based interview system. Input your JSON configuration below to start an interview session.</p>
+        </header>
+
+        <main>
+            <section class="setup-section">
+                <h2>Create Interview Session</h2>
+                <div class="form-container">
+                    <div class="form-group">
+                        <label for="json-input">Enter JSON Configuration:</label>
+                        <textarea id="json-input" placeholder="Paste your JSON configuration here..."></textarea>
+                        <button id="load-sample">Load Sample JSON</button>
+                    </div>
+                    <div class="button-group">
+                        <button id="validate-json">Validate JSON</button>
+                        <button id="create-session" class="primary-button">Create Interview Session</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="interview-section" id="interview-section" style="display: none;">
+                <h2>Interview Session</h2>
+                <div class="interview-container">
+                    <div class="call-status">
+                        <span id="status-indicator" class="status-indicator"></span>
+                        <span id="status-text">Initializing...</span>
+                    </div>
+                    <div class="webrtc-container" id="webrtc-container">
+                        <!-- WebRTC elements will be inserted here -->
+                    </div>
+                    <div class="interview-controls">
+                        <button id="end-interview" class="danger-button">End Interview</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="summary-section" id="summary-section" style="display: none;">
+                <h2>Interview Summary</h2>
+                <div class="summary-container">
+                    <div class="summary-header">
+                        <h3>Candidate Assessment</h3>
+                        <div class="score-container">
+                            <div class="score-item">
+                                <span class="score-label">Technical Score:</span>
+                                <span class="score-value" id="technical-score">--</span>
+                            </div>
+                            <div class="score-item">
+                                <span class="score-label">Communication Score:</span>
+                                <span class="score-value" id="communication-score">--</span>
+                            </div>
+                            <div class="score-item">
+                                <span class="score-label">Overall Score:</span>
+                                <span class="score-value" id="overall-score">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="summary-content">
+                        <div class="summary-section">
+                            <h4>Summary</h4>
+                            <p id="summary-text">Interview summary will appear here after the interview is completed.</p>
+                        </div>
+                        <div class="summary-section">
+                            <h4>Strengths</h4>
+                            <ul id="strengths-list"></ul>
+                        </div>
+                        <div class="summary-section">
+                            <h4>Areas for Improvement</h4>
+                            <ul id="improvement-list"></ul>
+                        </div>
+                        <div class="summary-section">
+                            <h4>Recommendation</h4>
+                            <p id="recommendation-text"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="transcript-container">
+                    <h3>Interview Transcript</h3>
+                    <div class="transcript" id="transcript"></div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2023 Tezhire. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="sample-data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
